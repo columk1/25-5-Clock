@@ -9,11 +9,12 @@ function App() {
   const [seconds, setSeconds] = React.useState(0)
   const [timer, setTimer] = React.useState(null)
   const [currentStatus, setCurrentStatus] = React.useState('Session')
+  const audioBeep = useRef(null);
 
   React.useEffect(
     () => {
       if (timer) {
-          interval = setInterval(() => {
+          let interval = setInterval(() => {
               handleNumber()
           }, 1000) //periodLength
           return () => {
@@ -26,7 +27,7 @@ function App() {
   function handleNumber() {
     if (seconds === 0) {
       if (minutes === 0) {                       
-        audioBeep.play()
+        audioBeep.current.play()
         switchesTimerMode()
       } else {
         setSeconds(59)
@@ -38,10 +39,10 @@ function App() {
   function switchesTimerMode() {
     currentStatus === 'Session'
         ? (setCurrentStatus('Break'),
-            setMinutes(stateBreak),
+            setMinutes(breakInterval),
             setSeconds(0))
         : (setCurrentStatus('Session'),
-            setMinutes(stateSession),
+            setMinutes(sessionInterval),
             setSeconds(0))
   }
 
@@ -55,7 +56,7 @@ function App() {
 
   function breakIncrement() {
     if (!timer) {
-      if (stateBreak <= 59) {
+      if (breakInterval <= 59) {
         setBreakInterval(breakInterval + 1)
       }
     }
@@ -63,18 +64,18 @@ function App() {
 
   function sessionDecrement() {
     if (!timer) {
-      if (session !== 1) {
-        setSession(session - 1)
-        setMinutes(session - 1)
+      if (sessionInterval !== 1) {
+        setSessionInterval(sessionInterval - 1)
+        setMinutes(sessionInterval - 1)
       }
     }        
   }
 
   function sessionIncrement() {
     if (!timer) {
-      if (session <= 59) {
-        setSession(session + 1)
-        setMinutes(session + 1)
+      if (sessionInterval <= 59) {
+        setSessionInterval(sessionInterval + 1)
+        setMinutes(sessionInterval + 1)
       }
     }             
   }
@@ -87,8 +88,8 @@ function App() {
     setCurrentStatus('Session')
     stopTimer()
     //setPeriodLength(null)
-    audioBeep.pause()
-    audioBeep.currentTime = 0
+    audioBeep.current.pause()
+    audioBeep.current.currentTime = 0
   }
 
   function startStop() {
@@ -113,7 +114,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Clock</h1>
+      <h1>25+5 Clock</h1>
 
       <TimerOutput
         time={timeLeft()}
@@ -143,7 +144,7 @@ function App() {
           </div>
         </div>
       </div>
-      <audio id="beep" preload="auto" src="./assets/beep.wav" ref={audioBeep} />
+      <audio ref={audioBeep} id="beep" preload="auto" src="./assets/beep.wav"/>
     </div>
   )
 }
@@ -152,8 +153,18 @@ function App() {
 function TimerOutput({ time, status }) {
   return (
       <div className='timer-output'>
+        <div className="base-timer">
+          <svg className="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g className="base-timer-circle">
+              <circle className="base-timer-path-elapsed" cx="50" cy="50" r="45" />
+            </g>
+          </svg>
+          <span id="base-timer-label" className="base-timer-label">
           <div id='timer-label'>{status}</div>
           <div id='time-left'>{time}</div>
+          </span>
+
+        </div>
       </div>
   )
 }
